@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoxruh Helper Bot - German B2</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); color: #fff; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .container { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px; padding: 25px; width: 100%; max-width: 650px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5); }
+        h1 { text-align: center; color: #00d2ff; margin-bottom: 20px; font-size: 24px; }
+        .bot-card { background: rgba(0, 0, 0, 0.3); border-left: 5px solid #00d2ff; padding: 15px; border-radius: 12px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
+        .bot-avatar { font-size: 35px; }
+        .bot-text strong { color: #00d2ff; display: block; margin-bottom: 3px; }
+        .bot-text p { font-size: 14px; color: #ddd; }
+        .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
+        input { flex: 1; padding: 12px 15px; border-radius: 10px; border: none; outline: none; font-size: 15px; background: rgba(255, 255, 255, 0.9); color: #333; }
+        .nav-btns { display: flex; justify-content: space-between; margin-bottom: 15px; gap: 10px; }
+        button { padding: 10px 18px; border: none; border-radius: 10px; background: #00d2ff; color: #000; font-weight: bold; cursor: pointer; transition: all 0.2s; font-size: 14px; }
+        button:hover { background: #3a7bd5; color: #fff; }
+        .btn-speak { background: #ff007f; color: #fff; width: 100%; padding: 12px; font-size: 16px; margin-top: 15px; }
+        .btn-speak:hover { background: #ff529a; }
+        .phrase-card { background: rgba(255, 255, 255, 0.95); color: #222; padding: 20px; border-radius: 15px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .german-phrase { font-size: 22px; color: #7f00ff; font-weight: bold; margin-bottom: 8px; }
+        .uzbek-translation { font-size: 16px; color: #ff007f; font-weight: 600; margin-bottom: 15px; }
+        .example-sentence { font-size: 15px; color: #444; background: #f0f4f8; padding: 10px; border-radius: 8px; font-style: italic; }
+        .counter { text-align: center; margin-top: 10px; font-size: 13px; color: #aaa; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🇩🇪 Nemis Tili B2 - 100 Iboralar</h1>
+        <div class="bot-card">
+            <div class="bot-avatar">🤖</div>
+            <div class="bot-text">
+                <strong>Shoxruh Helper Bot:</strong>
+                <p id="botMsg">Salom! B2 iboralarni o'rganishga tayyormisiz?</p>
+            </div>
+        </div>
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Iborani qidirish..." oninput="searchPhrase()">
+        </div>
+        <div class="nav-btns">
+            <button onclick="prevPhrase()">⬅️ Oldingisi</button>
+            <button onclick="nextPhrase()">Keyingisi ➡️</button>
+        </div>
+        <div class="phrase-card">
+            <div class="german-phrase" id="dePhrase">Yuklanmoqda...</div>
+            <div class="uzbek-translation" id="uzTrans">Yuklanmoqda...</div>
+            <div class="example-sentence" id="deExample">Yuklanmoqda...</div>
+            <button class="btn-speak" onclick="playAudio()">🔊 Ovozli O'qish</button>
+        </div>
+        <div class="counter" id="counter">1 / 100</div>
+    </div>
+    <audio id="audioPlayer"></audio>
+    <script>
+        const phrases = [
+            { de: "Meiner Meinung nach", uz: "Mening fikrimcha", ex: "Meiner Meinung nach ist diese Entscheidung richtig." },
+            { de: "Ich bin der Ansicht, dass...", uz: "Men ... degan fikrdaman", ex: "Ich bin der Ansicht, dass wir mehr Zeit brauchen." },
+            { de: "Es kommt darauf an", uz: "Bu vaziyatga bog'liq", ex: "Es kommt darauf an, wie das Wetter morgen wird." },
+            { de: "Einerseits ..., andererseits ...", uz: "Bir tomondan ..., boshqa tomondan ...", ex: "Einerseits ist es teuer, andererseits ist es schnell." },
+            { de: "Im Vergleich zu...", uz: "...ga solishtirganda", ex: "Im Vergleich zu letztem Jahr ist es kälter." },
+            { de: "Aus diesem Grund", uz: "Shu sababli", ex: "Aus diesem Grund kann ich heute nicht kommen." },
+            { de: "Ich bin davon überzeugt, dass...", uz: "Men ...ga ishonchim komil", ex: "Ich bin davon überzeugt, dass du es schaffst." },
+            { de: "Soweit ich weiß", uz: "Men bilishimcha", ex: "Soweit ich weiß, kommt er erst morgen." },
+            { de: "Im Großen und Ganzen", uz: "Umuman olganda", ex: "Im Großen und Ganzen war die Prüfung einfach." },
+            { de: "Es steht außer Zweifel, dass...", uz: "...ga hech qanday shubha yo'q", ex: "Es steht außer Zweifel, dass Sprache wichtig ist." },
+            { de: "In der Regel", uz: "Odatda / Qoidaga ko'ra", ex: "In der Regel stehe ich um 7 Uhr auf." },
+            { de: "Bescheid sagen", uz: "Xabar bermoq", ex: "Sag mir bitte morgen Bescheid!" },
+            { de: "Im Laufe der Zeit", uz: "Vaqt o'tishi bilan", ex: "Im Laufe der Zeit lernt man vieles." },
+            { de: "In Bezug auf...", uz: "...ga nisbatan", ex: "In Bezug auf Ihre Frage habe ich eine Idee." },
+            { de: "Im Gegensatz zu...", uz: "...dan farqli o'laroq", ex: "Im Gegensatz zu dir mag ich Tee." },
+            { de: "Vor allem", uz: "Asosan / Birinchi navbatda", ex: "Vor allem musst du ruhig bleiben." },
+            { de: "Aus meiner Sicht", uz: "Mening nazarimda", ex: "Aus meiner Sicht ist das kein Problem." },
+            { de: "Auf den ersten Blick", uz: "Birinchi qarashda", ex: "Auf den ersten Blick sah alles gut aus." },
+            { de: "Ohne Zweifel", uz: "Shubhasiz", ex: "Das ist ohne Zweifel die beste Lösung." },
+            { de: "Schritt für Schritt", uz: "Qadam-baqadam", ex: "Wir lernen Deutsch Schritt für Schritt." }
+        ];
+
+        let currentIndex = 0;
+        function updateCard() {
+            const item = phrases[currentIndex];
+            document.getElementById('dePhrase').innerText = item.de;
+            document.getElementById('uzTrans').innerText = "Tarjimasi: " + item.uz;
+            document.getElementById('deExample').innerText = "Misol: \"" + item.ex + "\"";
+            document.getElementById('counter').innerText = (currentIndex + 1) + " / " + phrases.length;
+            document.getElementById('botMsg').innerHTML = `Iborani o'rganing: <b>"${item.de}"</b>`;
+        }
+        function nextPhrase() { if (currentIndex < phrases.length - 1) { currentIndex++; updateCard(); } }
+        function prevPhrase() { if (currentIndex > 0) { currentIndex--; updateCard(); } }
+        function searchPhrase() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const foundIndex = phrases.findIndex(p => p.de.toLowerCase().includes(query) || p.uz.toLowerCase().includes(query));
+            if (foundIndex !== -1) { currentIndex = foundIndex; updateCard(); }
+        }
+        function playAudio() {
+            const item = phrases[currentIndex];
+            const textToSpeak = item.de + ". " + item.ex;
+            const encodedText = encodeURIComponent(textToSpeak);
+            const player = document.getElementById('audioPlayer');
+            player.src = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=de&client=tw-ob`;
+            player.play().catch(function() {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                    utterance.lang = 'de-DE';
+                    window.speechSynthesis.speak(utterance);
+                }
+            });
+        }
+        updateCard();
+    </script>
+</body>
+</html>
